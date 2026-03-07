@@ -25,6 +25,7 @@ ExpandableText("Lorem ipsum dolor sit amet, consectetur adipiscing elit...")
     .trimMultipleNewlinesWhenTruncated(true)
  ```
 */
+
 public struct ExpandableText: View {
 
     @State private var isExpanded: Bool = false
@@ -33,7 +34,8 @@ public struct ExpandableText: View {
     @State private var intrinsicSize: CGSize = .zero
     @State private var truncatedSize: CGSize = .zero
     @State private var moreTextSize: CGSize = .zero
-    
+
+    private var attributedString: AttributedString?
     private let text: String
     internal var font: Font = .body
     internal var color: Color? = nil
@@ -53,7 +55,12 @@ public struct ExpandableText: View {
     public init(_ text: String) {
         self.text = text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    
+
+    public init(_ attributedString: AttributedString) {
+        self.attributedString = attributedString
+        self.text = String(attributedString.characters[...])
+    }
+
     public var body: some View {
         content
             .lineLimit(isExpanded ? nil : lineLimit)
@@ -99,14 +106,25 @@ public struct ExpandableText: View {
     }
     
     private var content: some View {
-        Text(.init(
-            trimMultipleNewlinesWhenTruncated
-                ? (shouldShowMoreButton ? textTrimmingDoubleNewlines : text)
-                : text
-        ))
-        .font(font)
-        .applyForegroundColorIfNeeded(color)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        if let attributedString = attributedString {
+            AnyView(
+                Text(attributedString)
+                    .font(font)
+                    .applyForegroundColorIfNeeded(color)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            )
+        } else {
+            AnyView(
+                Text(.init(
+                    trimMultipleNewlinesWhenTruncated
+                    ? (shouldShowMoreButton ? textTrimmingDoubleNewlines : text)
+                    : text
+                ))
+                .font(font)
+                .applyForegroundColorIfNeeded(color)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            )
+        }
     }
 
     private var shouldShowMoreButton: Bool {
