@@ -36,6 +36,7 @@ public struct ExpandableText: View {
     @State private var moreTextSize: CGSize = .zero
 
     private var attributedString: AttributedString?
+    private var onTapGesture: (() -> Void)?
     private let text: String
     internal var font: Font = .body
     internal var color: Color? = nil
@@ -52,12 +53,14 @@ public struct ExpandableText: View {
      - Parameter text: The initial text string to display in the `ExpandableText` view.
      - Returns: A new `ExpandableText` instance with the specified text string and trimming applied.
      */
-    public init(_ text: String) {
+    public init(_ text: String, onTapGesture: (() -> Void)? = nil) {
         self.text = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.onTapGesture = onTapGesture
     }
 
-    public init(_ attributedString: AttributedString) {
+    public init(_ attributedString: AttributedString, onTapGesture: (() -> Void)? = nil) {
         self.attributedString = attributedString
+        self.onTapGesture = onTapGesture
         self.text = String(attributedString.characters[...])
     }
 
@@ -87,7 +90,9 @@ public struct ExpandableText: View {
             )
             .contentShape(Rectangle())
             .onTapGesture {
-                if (isExpanded && collapseEnabled) ||
+                if let onTapGesture {
+                    onTapGesture()
+                } else if (isExpanded && collapseEnabled) ||
                      shouldShowMoreButton {
                     withAnimation(expandAnimation) { isExpanded.toggle() }
                 }
