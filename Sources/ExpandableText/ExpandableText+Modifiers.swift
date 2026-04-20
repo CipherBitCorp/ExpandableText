@@ -64,6 +64,17 @@ public extension ExpandableText {
         copy.moreButtonText = moreText
         return copy
     }
+
+    /**
+     Sets the text to use for the "show less" button in the `ExpandableText` instance.
+     - Parameter lessText: The text to use for the "show less" button. Defaults to `Less`
+     - Returns: A new `ExpandableText` instance with the specified "show less" button text applied.
+     */
+    func lessButtonText(_ lessText: String) -> Self {
+        var copy = self
+        copy.lessButtonText = lessText
+        return copy
+    }
     
     /**
      Sets the font to use for the "show more" button in the `ExpandableText` instance.

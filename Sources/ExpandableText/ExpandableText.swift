@@ -42,6 +42,7 @@ public struct ExpandableText: View {
     internal var color: Color? = nil
     internal var lineLimit: Int = 3
     internal var moreButtonText: String = "more"
+    internal var lessButtonText: String = "Less"
     internal var moreButtonFont: Font?
     internal var moreButtonColor: Color = .accentColor
     internal var expandAnimation: Animation? = nil
@@ -91,7 +92,9 @@ public struct ExpandableText: View {
             .applyingTruncationMask(size: moreTextSize, enabled: shouldShowMoreButton)
             .readSize { size in
                 truncatedSize = size
-                isTruncated = truncatedSize != intrinsicSize
+                if !isExpanded {
+                    isTruncated = truncatedSize != intrinsicSize
+                }
             }
             .background(
                 content
@@ -100,7 +103,9 @@ public struct ExpandableText: View {
                     .hidden()
                     .readSize { size in
                         intrinsicSize = size
-                        isTruncated = truncatedSize != intrinsicSize
+                        if !isExpanded {
+                            isTruncated = truncatedSize != intrinsicSize
+                        }
                     }
             )
             .background(
@@ -119,11 +124,11 @@ public struct ExpandableText: View {
                 }
             }
             .modifier(OverlayAdapter(alignment: .trailingLastTextBaseline, view: {
-                if shouldShowMoreButton {
+                if shouldShowToggleButton {
                     Button {
                         toggleExpanded()
                     } label: {
-                        Text(moreButtonText)
+                        Text(toggleButtonText)
                             .font(moreButtonFont ?? font)
                             .foregroundColor(moreButtonColor)
                     }
@@ -155,6 +160,14 @@ public struct ExpandableText: View {
 
     private var shouldShowMoreButton: Bool {
         !isExpanded && isTruncated
+    }
+
+    private var shouldShowToggleButton: Bool {
+        isTruncated
+    }
+
+    private var toggleButtonText: String {
+        isExpanded ? lessButtonText : moreButtonText
     }
     
     private var textTrimmingDoubleNewlines: String {
@@ -188,12 +201,12 @@ private extension View {
 struct ExpandableText_Previews: PreviewProvider {
     static var previews: some View {
         ExpandableText(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in augue ut ipsum euismod volutpat. Praesent non justo sed nisl feugiat posuere.",
-            expandAnimation: .default
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in augue ut ipsum euismod volutpat. Praesent non justo sed nisl feugiat posuere."
         )
             .font(.body)
             .lineLimit(3)
             .moreButtonText("more")
+            .lessButtonText("less")
             .moreButtonColor(.blue)
             .padding()
             .previewLayout(.sizeThatFits)
