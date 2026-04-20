@@ -44,7 +44,7 @@ public struct ExpandableText: View {
     internal var moreButtonText: String = "more"
     internal var moreButtonFont: Font?
     internal var moreButtonColor: Color = .accentColor
-    internal var expandAnimation: Animation = .default
+    internal var expandAnimation: Animation? = nil
     internal var collapseEnabled: Bool = false
     internal var trimMultipleNewlinesWhenTruncated: Bool = true
     
@@ -58,10 +58,31 @@ public struct ExpandableText: View {
         self.onTapGesture = onTapGesture
     }
 
+    public init(
+        _ text: String,
+        expandAnimation: Animation,
+        onTapGesture: (() -> Void)? = nil
+    ) {
+        self.text = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.onTapGesture = onTapGesture
+        self.expandAnimation = expandAnimation
+    }
+
     public init(_ attributedString: AttributedString, onTapGesture: (() -> Void)? = nil) {
         self.attributedString = attributedString
         self.onTapGesture = onTapGesture
         self.text = String(attributedString.characters[...])
+    }
+
+    public init(
+        _ attributedString: AttributedString,
+        expandAnimation: Animation,
+        onTapGesture: (() -> Void)? = nil
+    ) {
+        self.attributedString = attributedString
+        self.onTapGesture = onTapGesture
+        self.text = String(attributedString.characters[...])
+        self.expandAnimation = expandAnimation
     }
 
     public var body: some View {
@@ -94,13 +115,13 @@ public struct ExpandableText: View {
                     onTapGesture()
                 } else if (isExpanded && collapseEnabled) ||
                      shouldShowMoreButton {
-                    withAnimation(expandAnimation) { isExpanded.toggle() }
+                    toggleExpanded()
                 }
             }
             .modifier(OverlayAdapter(alignment: .trailingLastTextBaseline, view: {
                 if shouldShowMoreButton {
                     Button {
-                        withAnimation(expandAnimation) { isExpanded.toggle() }
+                        toggleExpanded()
                     } label: {
                         Text(moreButtonText)
                             .font(moreButtonFont ?? font)
@@ -139,6 +160,14 @@ public struct ExpandableText: View {
     private var textTrimmingDoubleNewlines: String {
         text.replacingOccurrences(of: #"\n\s*\n"#, with: "\n", options: .regularExpression)
     }
+
+    private func toggleExpanded() {
+        if let expandAnimation {
+            withAnimation(expandAnimation) { isExpanded.toggle() }
+        } else {
+            isExpanded.toggle()
+        }
+    }
 }
 
 private extension View {
@@ -155,3 +184,20 @@ private extension View {
         }
     }
 }
+#if DEBUG
+struct ExpandableText_Previews: PreviewProvider {
+    static var previews: some View {
+        ExpandableText(
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in augue ut ipsum euismod volutpat. Praesent non justo sed nisl feugiat posuere.",
+            expandAnimation: .default
+        )
+            .font(.body)
+            .lineLimit(3)
+            .moreButtonText("more")
+            .moreButtonColor(.blue)
+            .padding()
+            .previewLayout(.sizeThatFits)
+    }
+}
+#endif
+

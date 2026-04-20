@@ -89,7 +89,7 @@ public extension ExpandableText {
     
     /**
      Sets the animation to use when expanding the `ExpandableText` instance.
-     - Parameter animation: The animation to use for the expansion. Defaults to `default`
+     - Parameter animation: The animation to use for the expansion.
      - Returns: A new `ExpandableText` instance with the specified expansion animation applied.
      */
     func expandAnimation(_ animation: Animation) -> Self {
