@@ -111,6 +111,8 @@ public struct ExpandableText: View {
             .background(
                 Text(moreButtonText)
                     .font(moreButtonFont ?? font)
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 6)
                     .hidden()
                     .readSize { moreTextSize = $0 }
             )
@@ -131,6 +133,9 @@ public struct ExpandableText: View {
                         Text(toggleButtonText)
                             .font(moreButtonFont ?? font)
                             .foregroundColor(moreButtonColor)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 6)
+                            .contentShape(Rectangle())
                     }
                 }
             }))
