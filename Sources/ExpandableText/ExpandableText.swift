@@ -111,7 +111,7 @@ public struct ExpandableText: View {
             .background(
                 Text(moreButtonText)
                     .font(moreButtonFont ?? font)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 6)
                     .padding(.horizontal, 6)
                     .hidden()
                     .readSize { moreTextSize = $0 }
@@ -133,12 +133,13 @@ public struct ExpandableText: View {
                         Text(toggleButtonText)
                             .font(moreButtonFont ?? font)
                             .foregroundColor(moreButtonColor)
-                            .padding(.vertical, 8)
+                            .padding(.vertical, 6)
                             .padding(.horizontal, 6)
                             .contentShape(Rectangle())
                     }
                 }
             }))
+            .animation(expandAnimation, value: isExpanded)
     }
     
     private var content: some View {
@@ -180,11 +181,7 @@ public struct ExpandableText: View {
     }
 
     private func toggleExpanded() {
-        if let expandAnimation {
-            withAnimation(expandAnimation) { isExpanded.toggle() }
-        } else {
-            isExpanded.toggle()
-        }
+        isExpanded.toggle()
     }
 }
 
