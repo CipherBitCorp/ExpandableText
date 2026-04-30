@@ -107,6 +107,7 @@ public struct ExpandableText: View {
                     }))
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             content
                 .lineLimit(nil)
