@@ -87,59 +87,47 @@ public struct ExpandableText: View {
     }
 
     public var body: some View {
-        content
-            .lineLimit(isExpanded ? nil : lineLimit)
-            .applyingTruncationMask(size: moreTextSize, enabled: shouldShowMoreButton)
-            .readSize { size in
-                truncatedSize = size
-                if !isExpanded {
-                    isTruncated = truncatedSize != intrinsicSize
-                }
-            }
-            .background(
-                content
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .hidden()
-                    .readSize { size in
-                        intrinsicSize = size
-                        if !isExpanded {
-                            isTruncated = truncatedSize != intrinsicSize
-                        }
-                    }
-            )
-            .background(
-                Text(moreButtonText)
-                    .font(moreButtonFont ?? font)
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 6)
-                    .hidden()
-                    .readSize { moreTextSize = $0 }
-            )
-            .contentShape(Rectangle())
-            .onTapGesture {
-                if let onTapGesture {
-                    onTapGesture()
-                } else if (isExpanded && collapseEnabled) ||
-                     shouldShowMoreButton {
-                    toggleExpanded()
-                }
-            }
-            .modifier(OverlayAdapter(alignment: .trailingLastTextBaseline, view: {
+        VStack(alignment: .leading, spacing: 0) {
+            if isExpanded {
+                textView(lineLimit: nil)
+
                 if shouldShowToggleButton {
-                    Button {
-                        toggleExpanded()
-                    } label: {
-                        Text(toggleButtonText)
-                            .font(moreButtonFont ?? font)
-                            .foregroundColor(moreButtonColor)
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 6)
-                            .contentShape(Rectangle())
+                    HStack {
+                        Spacer(minLength: 0)
+                        toggleButton
                     }
                 }
-            }))
-            .animation(expandAnimation, value: isExpanded)
+            } else {
+                textView(lineLimit: lineLimit)
+                    .applyingTruncationMask(size: moreTextSize, enabled: shouldShowMoreButton)
+                    .modifier(OverlayAdapter(alignment: .trailingLastTextBaseline, view: {
+                        if shouldShowToggleButton {
+                            toggleButton
+                        }
+                    }))
+            }
+        }
+        .background(
+            content
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+                .hidden()
+                .readSize { size in
+                    intrinsicSize = size
+                    if !isExpanded {
+                        isTruncated = truncatedSize != intrinsicSize
+                    }
+                }
+        )
+        .background(
+            Text(toggleMeasureText)
+                .font(moreButtonFont ?? font)
+                .padding(.vertical, 6)
+                .padding(.horizontal, 6)
+                .hidden()
+                .readSize { moreTextSize = $0 }
+        )
+        .animation(expandAnimation, value: isExpanded)
     }
     
     private var content: some View {
@@ -164,6 +152,39 @@ public struct ExpandableText: View {
         }
     }
 
+    private var toggleButton: some View {
+        Button {
+            toggleExpanded()
+        } label: {
+            Text(toggleButtonText)
+                .font(moreButtonFont ?? font)
+                .foregroundColor(moreButtonColor)
+                .padding(.vertical, 6)
+                .padding(.horizontal, 6)
+                .background(Color(uiColor: .systemBackground))
+                .contentShape(Rectangle())
+        }
+    }
+
+    private func textView(lineLimit: Int?) -> some View {
+        content
+            .lineLimit(lineLimit)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if let onTapGesture {
+                    onTapGesture()
+                } else if isExpanded && collapseEnabled {
+                    toggleExpanded()
+                }
+            }
+            .readSize { size in
+                truncatedSize = size
+                if !isExpanded {
+                    isTruncated = truncatedSize != intrinsicSize
+                }
+            }
+    }
+
     private var shouldShowMoreButton: Bool {
         !isExpanded && isTruncated
     }
@@ -175,7 +196,11 @@ public struct ExpandableText: View {
     private var toggleButtonText: String {
         isExpanded ? lessButtonText : moreButtonText
     }
-    
+
+    private var toggleMeasureText: String {
+        moreButtonText.count >= lessButtonText.count ? moreButtonText : lessButtonText
+    }
+
     private var textTrimmingDoubleNewlines: String {
         text.replacingOccurrences(of: #"\n\s*\n"#, with: "\n", options: .regularExpression)
     }
@@ -204,6 +229,21 @@ struct ExpandableText_Previews: PreviewProvider {
     static var previews: some View {
         ExpandableText(
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in augue ut ipsum euismod volutpat. Praesent non justo sed nisl feugiat posuere."
+        )
+            .font(.body)
+            .lineLimit(3)
+            .moreButtonText("more")
+            .lessButtonText("less")
+            .moreButtonColor(.blue)
+            .padding()
+            .previewLayout(.sizeThatFits)
+    }
+}
+
+struct ExpandableTextTwo_Previews: PreviewProvider {
+    static var previews: some View {
+        ExpandableText(
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in augue ut ipsum euismod volutpat. Praesent non justo sed nisl feugiat posuere plus more text added here and."
         )
             .font(.body)
             .lineLimit(3)
